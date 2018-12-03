@@ -1,0 +1,41 @@
+entity Product {
+	productCode String required,
+    productName String required,
+    barCode String required,
+    description String,
+    price Double,
+    imageURL String
+}
+
+entity Stock {
+	productCode String required,
+    supplier String,
+    quantity Integer required
+}
+
+entity Sale {
+	timestamp ZonedDateTime required,
+    productCode String required,
+    quantity Integer required,
+    subTotal Double required,
+    salesPersonNumber String required
+}
+
+entity SalesPerson {
+	salesPersonNumber String required,
+    name String required,
+    surname String required
+}
+
+// Set pagination options
+paginate Product, Stock, SalesPerson with infinite-scroll
+paginate Sale with pagination
+
+// Use Data Transfert Objects (DTO)
+// dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl except Product, Sale, Stock, SalesPerson
+
+// Set an angular suffix
+// angularSuffix * with mySuffix
