@@ -1,0 +1,46 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "co.za.adroit.transactor"
+    },
+    "jhipsterVersion": "5.7.0",
+    "applicationType": "monolith",
+    "baseName": "transactor",
+    "packageName": "co.za.adroit.transactor",
+    "packageFolder": "co/za/adroit/transactor",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "mysql",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": "eureka",
+    "buildTool": "gradle",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "ZDhlOTljNzUwMjRjYzM1YTZjNDY0MDM0NzBjNzhkNmEzNjU3MjY3ODc5ZTMzYmI5MjZlNWUwZmIzZWYxZDE1NTUzNWI1ZmY5ZmFmZjZjNDNmZGI4OGUwNTQzNmJjZjg5M2YzZDBkMDdjOGM5MDUzZjVkY2JhM2M2MDIwZGY3MWI=",
+    "clientFramework": "angularX",
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "otherModules": [
+      {
+        "name": "generator-jhipster-nav-element",
+        "version": "2.0.13"
+      },
+      {
+        "name": "generator-jhipster-vuejs2",
+        "version": "0.3.81"
+      },
+      {
+        "name": "generator-jhipster-social-login-api",
+        "version": "0.0.1"
+      }
+    ],
+    "enableTranslation": false
+  }
+}
