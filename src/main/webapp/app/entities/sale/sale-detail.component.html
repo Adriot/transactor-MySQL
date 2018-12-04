@@ -1,0 +1,43 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="sale">
+            <h2><span>Sale</span> {{sale.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span>Timestamp</span></dt>
+                <dd>
+                    <span>{{sale.timestamp}}</span>
+                </dd>
+                <dt><span>Product Code</span></dt>
+                <dd>
+                    <span>{{sale.productCode}}</span>
+                </dd>
+                <dt><span>Quantity</span></dt>
+                <dd>
+                    <span>{{sale.quantity}}</span>
+                </dd>
+                <dt><span>Sub Total</span></dt>
+                <dd>
+                    <span>{{sale.subTotal}}</span>
+                </dd>
+                <dt><span>Sales Person Number</span></dt>
+                <dd>
+                    <span>{{sale.salesPersonNumber}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/sale', sale.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

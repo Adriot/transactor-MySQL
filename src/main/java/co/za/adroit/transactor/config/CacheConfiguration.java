@@ -41,6 +41,10 @@ public class CacheConfiguration {
             cm.createCache(co.za.adroit.transactor.domain.User.class.getName(), jcacheConfiguration);
             cm.createCache(co.za.adroit.transactor.domain.Authority.class.getName(), jcacheConfiguration);
             cm.createCache(co.za.adroit.transactor.domain.User.class.getName() + ".authorities", jcacheConfiguration);
+            cm.createCache(co.za.adroit.transactor.domain.Product.class.getName(), jcacheConfiguration);
+            cm.createCache(co.za.adroit.transactor.domain.Stock.class.getName(), jcacheConfiguration);
+            cm.createCache(co.za.adroit.transactor.domain.Sale.class.getName(), jcacheConfiguration);
+            cm.createCache(co.za.adroit.transactor.domain.SalesPerson.class.getName(), jcacheConfiguration);
             // jhipster-needle-ehcache-add-entry
         };
     }
