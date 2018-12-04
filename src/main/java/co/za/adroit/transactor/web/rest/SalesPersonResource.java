@@ -1,11 +1,11 @@
 package co.za.adroit.transactor.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import co.za.adroit.transactor.domain.SalesPerson;
-import co.za.adroit.transactor.repository.SalesPersonRepository;
+import co.za.adroit.transactor.service.SalesPersonService;
 import co.za.adroit.transactor.web.rest.errors.BadRequestAlertException;
 import co.za.adroit.transactor.web.rest.util.HeaderUtil;
 import co.za.adroit.transactor.web.rest.util.PaginationUtil;
+import co.za.adroit.transactor.service.dto.SalesPersonDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,27 +34,27 @@ public class SalesPersonResource {
 
     private static final String ENTITY_NAME = "salesPerson";
 
-    private final SalesPersonRepository salesPersonRepository;
+    private final SalesPersonService salesPersonService;
 
-    public SalesPersonResource(SalesPersonRepository salesPersonRepository) {
-        this.salesPersonRepository = salesPersonRepository;
+    public SalesPersonResource(SalesPersonService salesPersonService) {
+        this.salesPersonService = salesPersonService;
     }
 
     /**
      * POST  /sales-people : Create a new salesPerson.
      *
-     * @param salesPerson the salesPerson to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new salesPerson, or with status 400 (Bad Request) if the salesPerson has already an ID
+     * @param salesPersonDTO the salesPersonDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new salesPersonDTO, or with status 400 (Bad Request) if the salesPerson has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/sales-people")
     @Timed
-    public ResponseEntity<SalesPerson> createSalesPerson(@Valid @RequestBody SalesPerson salesPerson) throws URISyntaxException {
-        log.debug("REST request to save SalesPerson : {}", salesPerson);
-        if (salesPerson.getId() != null) {
+    public ResponseEntity<SalesPersonDTO> createSalesPerson(@Valid @RequestBody SalesPersonDTO salesPersonDTO) throws URISyntaxException {
+        log.debug("REST request to save SalesPerson : {}", salesPersonDTO);
+        if (salesPersonDTO.getId() != null) {
             throw new BadRequestAlertException("A new salesPerson cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        SalesPerson result = salesPersonRepository.save(salesPerson);
+        SalesPersonDTO result = salesPersonService.save(salesPersonDTO);
         return ResponseEntity.created(new URI("/api/sales-people/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -63,22 +63,22 @@ public class SalesPersonResource {
     /**
      * PUT  /sales-people : Updates an existing salesPerson.
      *
-     * @param salesPerson the salesPerson to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated salesPerson,
-     * or with status 400 (Bad Request) if the salesPerson is not valid,
-     * or with status 500 (Internal Server Error) if the salesPerson couldn't be updated
+     * @param salesPersonDTO the salesPersonDTO to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated salesPersonDTO,
+     * or with status 400 (Bad Request) if the salesPersonDTO is not valid,
+     * or with status 500 (Internal Server Error) if the salesPersonDTO couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/sales-people")
     @Timed
-    public ResponseEntity<SalesPerson> updateSalesPerson(@Valid @RequestBody SalesPerson salesPerson) throws URISyntaxException {
-        log.debug("REST request to update SalesPerson : {}", salesPerson);
-        if (salesPerson.getId() == null) {
+    public ResponseEntity<SalesPersonDTO> updateSalesPerson(@Valid @RequestBody SalesPersonDTO salesPersonDTO) throws URISyntaxException {
+        log.debug("REST request to update SalesPerson : {}", salesPersonDTO);
+        if (salesPersonDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        SalesPerson result = salesPersonRepository.save(salesPerson);
+        SalesPersonDTO result = salesPersonService.save(salesPersonDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, salesPerson.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, salesPersonDTO.getId().toString()))
             .body(result);
     }
 
@@ -90,9 +90,9 @@ public class SalesPersonResource {
      */
     @GetMapping("/sales-people")
     @Timed
-    public ResponseEntity<List<SalesPerson>> getAllSalesPeople(Pageable pageable) {
+    public ResponseEntity<List<SalesPersonDTO>> getAllSalesPeople(Pageable pageable) {
         log.debug("REST request to get a page of SalesPeople");
-        Page<SalesPerson> page = salesPersonRepository.findAll(pageable);
+        Page<SalesPersonDTO> page = salesPersonService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/sales-people");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -100,29 +100,28 @@ public class SalesPersonResource {
     /**
      * GET  /sales-people/:id : get the "id" salesPerson.
      *
-     * @param id the id of the salesPerson to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the salesPerson, or with status 404 (Not Found)
+     * @param id the id of the salesPersonDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the salesPersonDTO, or with status 404 (Not Found)
      */
     @GetMapping("/sales-people/{id}")
     @Timed
-    public ResponseEntity<SalesPerson> getSalesPerson(@PathVariable Long id) {
+    public ResponseEntity<SalesPersonDTO> getSalesPerson(@PathVariable Long id) {
         log.debug("REST request to get SalesPerson : {}", id);
-        Optional<SalesPerson> salesPerson = salesPersonRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(salesPerson);
+        Optional<SalesPersonDTO> salesPersonDTO = salesPersonService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(salesPersonDTO);
     }
 
     /**
      * DELETE  /sales-people/:id : delete the "id" salesPerson.
      *
-     * @param id the id of the salesPerson to delete
+     * @param id the id of the salesPersonDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/sales-people/{id}")
     @Timed
     public ResponseEntity<Void> deleteSalesPerson(@PathVariable Long id) {
         log.debug("REST request to delete SalesPerson : {}", id);
-
-        salesPersonRepository.deleteById(id);
+        salesPersonService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 }

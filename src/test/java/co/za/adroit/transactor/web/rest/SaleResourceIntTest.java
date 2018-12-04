@@ -4,6 +4,9 @@ import co.za.adroit.transactor.TransactorApp;
 
 import co.za.adroit.transactor.domain.Sale;
 import co.za.adroit.transactor.repository.SaleRepository;
+import co.za.adroit.transactor.service.SaleService;
+import co.za.adroit.transactor.service.dto.SaleDTO;
+import co.za.adroit.transactor.service.mapper.SaleMapper;
 import co.za.adroit.transactor.web.rest.errors.ExceptionTranslator;
 
 import org.junit.Before;
@@ -63,6 +66,12 @@ public class SaleResourceIntTest {
     private SaleRepository saleRepository;
 
     @Autowired
+    private SaleMapper saleMapper;
+
+    @Autowired
+    private SaleService saleService;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -81,7 +90,7 @@ public class SaleResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final SaleResource saleResource = new SaleResource(saleRepository);
+        final SaleResource saleResource = new SaleResource(saleService);
         this.restSaleMockMvc = MockMvcBuilders.standaloneSetup(saleResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -116,9 +125,10 @@ public class SaleResourceIntTest {
         int databaseSizeBeforeCreate = saleRepository.findAll().size();
 
         // Create the Sale
+        SaleDTO saleDTO = saleMapper.toDto(sale);
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Sale in the database
@@ -139,11 +149,12 @@ public class SaleResourceIntTest {
 
         // Create the Sale with an existing ID
         sale.setId(1L);
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Sale in the database
@@ -159,10 +170,11 @@ public class SaleResourceIntTest {
         sale.setTimestamp(null);
 
         // Create the Sale, which fails.
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         List<Sale> saleList = saleRepository.findAll();
@@ -177,10 +189,11 @@ public class SaleResourceIntTest {
         sale.setProductCode(null);
 
         // Create the Sale, which fails.
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         List<Sale> saleList = saleRepository.findAll();
@@ -195,10 +208,11 @@ public class SaleResourceIntTest {
         sale.setQuantity(null);
 
         // Create the Sale, which fails.
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         List<Sale> saleList = saleRepository.findAll();
@@ -213,10 +227,11 @@ public class SaleResourceIntTest {
         sale.setSubTotal(null);
 
         // Create the Sale, which fails.
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         List<Sale> saleList = saleRepository.findAll();
@@ -231,10 +246,11 @@ public class SaleResourceIntTest {
         sale.setSalesPersonNumber(null);
 
         // Create the Sale, which fails.
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         restSaleMockMvc.perform(post("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         List<Sale> saleList = saleRepository.findAll();
@@ -303,10 +319,11 @@ public class SaleResourceIntTest {
             .quantity(UPDATED_QUANTITY)
             .subTotal(UPDATED_SUB_TOTAL)
             .salesPersonNumber(UPDATED_SALES_PERSON_NUMBER);
+        SaleDTO saleDTO = saleMapper.toDto(updatedSale);
 
         restSaleMockMvc.perform(put("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(updatedSale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isOk());
 
         // Validate the Sale in the database
@@ -326,11 +343,12 @@ public class SaleResourceIntTest {
         int databaseSizeBeforeUpdate = saleRepository.findAll().size();
 
         // Create the Sale
+        SaleDTO saleDTO = saleMapper.toDto(sale);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSaleMockMvc.perform(put("/api/sales")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(sale)))
+            .content(TestUtil.convertObjectToJsonBytes(saleDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Sale in the database
@@ -369,5 +387,28 @@ public class SaleResourceIntTest {
         assertThat(sale1).isNotEqualTo(sale2);
         sale1.setId(null);
         assertThat(sale1).isNotEqualTo(sale2);
+    }
+
+    @Test
+    @Transactional
+    public void dtoEqualsVerifier() throws Exception {
+        TestUtil.equalsVerifier(SaleDTO.class);
+        SaleDTO saleDTO1 = new SaleDTO();
+        saleDTO1.setId(1L);
+        SaleDTO saleDTO2 = new SaleDTO();
+        assertThat(saleDTO1).isNotEqualTo(saleDTO2);
+        saleDTO2.setId(saleDTO1.getId());
+        assertThat(saleDTO1).isEqualTo(saleDTO2);
+        saleDTO2.setId(2L);
+        assertThat(saleDTO1).isNotEqualTo(saleDTO2);
+        saleDTO1.setId(null);
+        assertThat(saleDTO1).isNotEqualTo(saleDTO2);
+    }
+
+    @Test
+    @Transactional
+    public void testEntityFromId() {
+        assertThat(saleMapper.fromId(42L).getId()).isEqualTo(42);
+        assertThat(saleMapper.fromId(null)).isNull();
     }
 }

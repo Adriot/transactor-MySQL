@@ -4,6 +4,9 @@ import co.za.adroit.transactor.TransactorApp;
 
 import co.za.adroit.transactor.domain.SalesPerson;
 import co.za.adroit.transactor.repository.SalesPersonRepository;
+import co.za.adroit.transactor.service.SalesPersonService;
+import co.za.adroit.transactor.service.dto.SalesPersonDTO;
+import co.za.adroit.transactor.service.mapper.SalesPersonMapper;
 import co.za.adroit.transactor.web.rest.errors.ExceptionTranslator;
 
 import org.junit.Before;
@@ -52,6 +55,12 @@ public class SalesPersonResourceIntTest {
     private SalesPersonRepository salesPersonRepository;
 
     @Autowired
+    private SalesPersonMapper salesPersonMapper;
+
+    @Autowired
+    private SalesPersonService salesPersonService;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -70,7 +79,7 @@ public class SalesPersonResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final SalesPersonResource salesPersonResource = new SalesPersonResource(salesPersonRepository);
+        final SalesPersonResource salesPersonResource = new SalesPersonResource(salesPersonService);
         this.restSalesPersonMockMvc = MockMvcBuilders.standaloneSetup(salesPersonResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -103,9 +112,10 @@ public class SalesPersonResourceIntTest {
         int databaseSizeBeforeCreate = salesPersonRepository.findAll().size();
 
         // Create the SalesPerson
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
         restSalesPersonMockMvc.perform(post("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isCreated());
 
         // Validate the SalesPerson in the database
@@ -124,11 +134,12 @@ public class SalesPersonResourceIntTest {
 
         // Create the SalesPerson with an existing ID
         salesPerson.setId(1L);
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSalesPersonMockMvc.perform(post("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the SalesPerson in the database
@@ -144,10 +155,11 @@ public class SalesPersonResourceIntTest {
         salesPerson.setSalesPersonNumber(null);
 
         // Create the SalesPerson, which fails.
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
 
         restSalesPersonMockMvc.perform(post("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isBadRequest());
 
         List<SalesPerson> salesPersonList = salesPersonRepository.findAll();
@@ -162,10 +174,11 @@ public class SalesPersonResourceIntTest {
         salesPerson.setName(null);
 
         // Create the SalesPerson, which fails.
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
 
         restSalesPersonMockMvc.perform(post("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isBadRequest());
 
         List<SalesPerson> salesPersonList = salesPersonRepository.findAll();
@@ -180,10 +193,11 @@ public class SalesPersonResourceIntTest {
         salesPerson.setSurname(null);
 
         // Create the SalesPerson, which fails.
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
 
         restSalesPersonMockMvc.perform(post("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isBadRequest());
 
         List<SalesPerson> salesPersonList = salesPersonRepository.findAll();
@@ -246,10 +260,11 @@ public class SalesPersonResourceIntTest {
             .salesPersonNumber(UPDATED_SALES_PERSON_NUMBER)
             .name(UPDATED_NAME)
             .surname(UPDATED_SURNAME);
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(updatedSalesPerson);
 
         restSalesPersonMockMvc.perform(put("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(updatedSalesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isOk());
 
         // Validate the SalesPerson in the database
@@ -267,11 +282,12 @@ public class SalesPersonResourceIntTest {
         int databaseSizeBeforeUpdate = salesPersonRepository.findAll().size();
 
         // Create the SalesPerson
+        SalesPersonDTO salesPersonDTO = salesPersonMapper.toDto(salesPerson);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSalesPersonMockMvc.perform(put("/api/sales-people")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(salesPerson)))
+            .content(TestUtil.convertObjectToJsonBytes(salesPersonDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the SalesPerson in the database
@@ -310,5 +326,28 @@ public class SalesPersonResourceIntTest {
         assertThat(salesPerson1).isNotEqualTo(salesPerson2);
         salesPerson1.setId(null);
         assertThat(salesPerson1).isNotEqualTo(salesPerson2);
+    }
+
+    @Test
+    @Transactional
+    public void dtoEqualsVerifier() throws Exception {
+        TestUtil.equalsVerifier(SalesPersonDTO.class);
+        SalesPersonDTO salesPersonDTO1 = new SalesPersonDTO();
+        salesPersonDTO1.setId(1L);
+        SalesPersonDTO salesPersonDTO2 = new SalesPersonDTO();
+        assertThat(salesPersonDTO1).isNotEqualTo(salesPersonDTO2);
+        salesPersonDTO2.setId(salesPersonDTO1.getId());
+        assertThat(salesPersonDTO1).isEqualTo(salesPersonDTO2);
+        salesPersonDTO2.setId(2L);
+        assertThat(salesPersonDTO1).isNotEqualTo(salesPersonDTO2);
+        salesPersonDTO1.setId(null);
+        assertThat(salesPersonDTO1).isNotEqualTo(salesPersonDTO2);
+    }
+
+    @Test
+    @Transactional
+    public void testEntityFromId() {
+        assertThat(salesPersonMapper.fromId(42L).getId()).isEqualTo(42);
+        assertThat(salesPersonMapper.fromId(null)).isNull();
     }
 }

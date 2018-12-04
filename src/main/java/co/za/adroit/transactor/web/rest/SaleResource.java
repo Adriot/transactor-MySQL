@@ -1,11 +1,11 @@
 package co.za.adroit.transactor.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import co.za.adroit.transactor.domain.Sale;
-import co.za.adroit.transactor.repository.SaleRepository;
+import co.za.adroit.transactor.service.SaleService;
 import co.za.adroit.transactor.web.rest.errors.BadRequestAlertException;
 import co.za.adroit.transactor.web.rest.util.HeaderUtil;
 import co.za.adroit.transactor.web.rest.util.PaginationUtil;
+import co.za.adroit.transactor.service.dto.SaleDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,27 +34,27 @@ public class SaleResource {
 
     private static final String ENTITY_NAME = "sale";
 
-    private final SaleRepository saleRepository;
+    private final SaleService saleService;
 
-    public SaleResource(SaleRepository saleRepository) {
-        this.saleRepository = saleRepository;
+    public SaleResource(SaleService saleService) {
+        this.saleService = saleService;
     }
 
     /**
      * POST  /sales : Create a new sale.
      *
-     * @param sale the sale to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new sale, or with status 400 (Bad Request) if the sale has already an ID
+     * @param saleDTO the saleDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new saleDTO, or with status 400 (Bad Request) if the sale has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/sales")
     @Timed
-    public ResponseEntity<Sale> createSale(@Valid @RequestBody Sale sale) throws URISyntaxException {
-        log.debug("REST request to save Sale : {}", sale);
-        if (sale.getId() != null) {
+    public ResponseEntity<SaleDTO> createSale(@Valid @RequestBody SaleDTO saleDTO) throws URISyntaxException {
+        log.debug("REST request to save Sale : {}", saleDTO);
+        if (saleDTO.getId() != null) {
             throw new BadRequestAlertException("A new sale cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Sale result = saleRepository.save(sale);
+        SaleDTO result = saleService.save(saleDTO);
         return ResponseEntity.created(new URI("/api/sales/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -63,22 +63,22 @@ public class SaleResource {
     /**
      * PUT  /sales : Updates an existing sale.
      *
-     * @param sale the sale to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated sale,
-     * or with status 400 (Bad Request) if the sale is not valid,
-     * or with status 500 (Internal Server Error) if the sale couldn't be updated
+     * @param saleDTO the saleDTO to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated saleDTO,
+     * or with status 400 (Bad Request) if the saleDTO is not valid,
+     * or with status 500 (Internal Server Error) if the saleDTO couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/sales")
     @Timed
-    public ResponseEntity<Sale> updateSale(@Valid @RequestBody Sale sale) throws URISyntaxException {
-        log.debug("REST request to update Sale : {}", sale);
-        if (sale.getId() == null) {
+    public ResponseEntity<SaleDTO> updateSale(@Valid @RequestBody SaleDTO saleDTO) throws URISyntaxException {
+        log.debug("REST request to update Sale : {}", saleDTO);
+        if (saleDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        Sale result = saleRepository.save(sale);
+        SaleDTO result = saleService.save(saleDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, sale.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, saleDTO.getId().toString()))
             .body(result);
     }
 
@@ -90,9 +90,9 @@ public class SaleResource {
      */
     @GetMapping("/sales")
     @Timed
-    public ResponseEntity<List<Sale>> getAllSales(Pageable pageable) {
+    public ResponseEntity<List<SaleDTO>> getAllSales(Pageable pageable) {
         log.debug("REST request to get a page of Sales");
-        Page<Sale> page = saleRepository.findAll(pageable);
+        Page<SaleDTO> page = saleService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/sales");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -100,29 +100,28 @@ public class SaleResource {
     /**
      * GET  /sales/:id : get the "id" sale.
      *
-     * @param id the id of the sale to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the sale, or with status 404 (Not Found)
+     * @param id the id of the saleDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the saleDTO, or with status 404 (Not Found)
      */
     @GetMapping("/sales/{id}")
     @Timed
-    public ResponseEntity<Sale> getSale(@PathVariable Long id) {
+    public ResponseEntity<SaleDTO> getSale(@PathVariable Long id) {
         log.debug("REST request to get Sale : {}", id);
-        Optional<Sale> sale = saleRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(sale);
+        Optional<SaleDTO> saleDTO = saleService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(saleDTO);
     }
 
     /**
      * DELETE  /sales/:id : delete the "id" sale.
      *
-     * @param id the id of the sale to delete
+     * @param id the id of the saleDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/sales/{id}")
     @Timed
     public ResponseEntity<Void> deleteSale(@PathVariable Long id) {
         log.debug("REST request to delete Sale : {}", id);
-
-        saleRepository.deleteById(id);
+        saleService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 }

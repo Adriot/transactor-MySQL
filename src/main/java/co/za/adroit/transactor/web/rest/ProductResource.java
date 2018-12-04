@@ -1,11 +1,11 @@
 package co.za.adroit.transactor.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import co.za.adroit.transactor.domain.Product;
-import co.za.adroit.transactor.repository.ProductRepository;
+import co.za.adroit.transactor.service.ProductService;
 import co.za.adroit.transactor.web.rest.errors.BadRequestAlertException;
 import co.za.adroit.transactor.web.rest.util.HeaderUtil;
 import co.za.adroit.transactor.web.rest.util.PaginationUtil;
+import co.za.adroit.transactor.service.dto.ProductDTO;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,27 +34,27 @@ public class ProductResource {
 
     private static final String ENTITY_NAME = "product";
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    public ProductResource(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductResource(ProductService productService) {
+        this.productService = productService;
     }
 
     /**
      * POST  /products : Create a new product.
      *
-     * @param product the product to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new product, or with status 400 (Bad Request) if the product has already an ID
+     * @param productDTO the productDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new productDTO, or with status 400 (Bad Request) if the product has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/products")
     @Timed
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) throws URISyntaxException {
-        log.debug("REST request to save Product : {}", product);
-        if (product.getId() != null) {
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) throws URISyntaxException {
+        log.debug("REST request to save Product : {}", productDTO);
+        if (productDTO.getId() != null) {
             throw new BadRequestAlertException("A new product cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        Product result = productRepository.save(product);
+        ProductDTO result = productService.save(productDTO);
         return ResponseEntity.created(new URI("/api/products/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -63,22 +63,22 @@ public class ProductResource {
     /**
      * PUT  /products : Updates an existing product.
      *
-     * @param product the product to update
-     * @return the ResponseEntity with status 200 (OK) and with body the updated product,
-     * or with status 400 (Bad Request) if the product is not valid,
-     * or with status 500 (Internal Server Error) if the product couldn't be updated
+     * @param productDTO the productDTO to update
+     * @return the ResponseEntity with status 200 (OK) and with body the updated productDTO,
+     * or with status 400 (Bad Request) if the productDTO is not valid,
+     * or with status 500 (Internal Server Error) if the productDTO couldn't be updated
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PutMapping("/products")
     @Timed
-    public ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product) throws URISyntaxException {
-        log.debug("REST request to update Product : {}", product);
-        if (product.getId() == null) {
+    public ResponseEntity<ProductDTO> updateProduct(@Valid @RequestBody ProductDTO productDTO) throws URISyntaxException {
+        log.debug("REST request to update Product : {}", productDTO);
+        if (productDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        Product result = productRepository.save(product);
+        ProductDTO result = productService.save(productDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, product.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, productDTO.getId().toString()))
             .body(result);
     }
 
@@ -90,9 +90,9 @@ public class ProductResource {
      */
     @GetMapping("/products")
     @Timed
-    public ResponseEntity<List<Product>> getAllProducts(Pageable pageable) {
+    public ResponseEntity<List<ProductDTO>> getAllProducts(Pageable pageable) {
         log.debug("REST request to get a page of Products");
-        Page<Product> page = productRepository.findAll(pageable);
+        Page<ProductDTO> page = productService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/products");
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -100,29 +100,28 @@ public class ProductResource {
     /**
      * GET  /products/:id : get the "id" product.
      *
-     * @param id the id of the product to retrieve
-     * @return the ResponseEntity with status 200 (OK) and with body the product, or with status 404 (Not Found)
+     * @param id the id of the productDTO to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the productDTO, or with status 404 (Not Found)
      */
     @GetMapping("/products/{id}")
     @Timed
-    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
         log.debug("REST request to get Product : {}", id);
-        Optional<Product> product = productRepository.findById(id);
-        return ResponseUtil.wrapOrNotFound(product);
+        Optional<ProductDTO> productDTO = productService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(productDTO);
     }
 
     /**
      * DELETE  /products/:id : delete the "id" product.
      *
-     * @param id the id of the product to delete
+     * @param id the id of the productDTO to delete
      * @return the ResponseEntity with status 200 (OK)
      */
     @DeleteMapping("/products/{id}")
     @Timed
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         log.debug("REST request to delete Product : {}", id);
-
-        productRepository.deleteById(id);
+        productService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
 }
