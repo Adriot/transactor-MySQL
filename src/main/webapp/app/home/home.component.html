@@ -1,26 +1,57 @@
 <div class="row">
-    <div class="col-md-3">
-        <!--<span class="hipster img-fluid rounded"></span>-->
-    </div>
     <div class="col-md-9">
         <h1 class="display-4">Welcome Transactor</h1>
-        <p class="lead">Please login to start working</p>
 
         <div [ngSwitch]="isAuthenticated()">
-            <div class="alert alert-success" *ngSwitchCase="true">
-                <span id="home-logged-message" *ngIf="account"
-                   > You are logged in as user "{{account.login}}". </span>
+            <div *ngSwitchCase="true">
+                <div class="alert alert-success" *ngIf="account">
+                    <span id="home-logged-message"
+                    > You are logged in as user "{{account.login}}". </span>
+                </div>
+
+                <div [ngSwitch]="isAdmin()">
+
+                    <div *ngSwitchCase="true">
+                        Add Admin Operations Here!
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" routerLink="product" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
+                                    <span>Products</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" routerLink="stock" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
+                                    <span>Stock</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" routerLink="sale" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
+                                    <span>Sales</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div *ngSwitchCase="false">
+                        Add User Operations Here!
+                    </div>
+                </div>
             </div>
 
-            <div class="alert alert-warning" *ngSwitchCase="false">
-                <span>You can </span>
-                <a class="alert-link" (click)="login()">sign in</a>
-                <span>
+            <div *ngSwitchCase="false">
+                <div>
+                    <p class="lead">Please login to start working</p>
+                </div>
+                <div class="alert alert-warning">
+                    <span>You can </span>
+                    <a class="alert-link" (click)="login()">sign in</a>
+                    <span>
                     as:
                     <br/>
                     <br/>- Administrator
                     <br/>- User
                 </span>
+                </div>
             </div>
             <div class="alert alert-warning" *ngSwitchCase="false">
                 <span>As administrator you can: </span>&nbsp;
@@ -29,4 +60,9 @@
         </div>
 
     </div>
+
+    <div class="col-md-3">
+        <!--<span class="hipster img-fluid rounded"></span>-->
+    </div>
+
 </div>

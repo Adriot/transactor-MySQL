@@ -37,4 +37,14 @@ export class HomeComponent implements OnInit {
     login() {
         this.modalRef = this.loginModalService.open();
     }
+
+    isAdmin() {
+        let adminFlag = false;
+        this.account.authorities.forEach(role => {
+            if (role === 'ROLE_ADMIN') {
+                adminFlag = true;
+            }
+        });
+        return adminFlag;
+    }
 }
